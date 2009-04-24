@@ -31,6 +31,9 @@ sub magic_side_request :Local{
     my( $self, $c, @rest_of_path ) = @_;
     $c->debug('magic side request happens!');
 
+    $c->stash->{side_called} ||= 0;
+    $c->stash->{side_called}++;
+
     my $path = '/'.join '/', @rest_of_path;
 
     $c->request->path($path);
@@ -39,4 +42,22 @@ sub magic_side_request :Local{
     $c->go($c->action, $c->request->args,  $c->request->captures);
 }
 
-;1;
+sub root : Chained('/') PathPart('') CaptureArgs(0) {
+    my( $self, $c, $arg ) = @_;
+    $c->stash->{root_called} ||= 0;
+    $c->stash->{root_called}++;
+}
+
+sub foo : Chained('root') PathPart('foo2') CaptureArgs(1) {
+    my( $self, $c, $arg ) = @_;
+    $c->stash->{foo_called} ||= 0;
+    $c->stash->{foo_called}++;
+}
+
+sub other_end : Chained('foo') PathPart('') Args(1) {
+    my( $self, $c, $arg ) = @_;
+    $c->stash->{other_called} ||= 0;
+    $c->stash->{other_called}++;
+}
+
+1;
