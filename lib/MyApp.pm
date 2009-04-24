@@ -23,6 +23,8 @@ sub chain :Chained('/') PathPart('foo') CaptureArgs(1){
 sub end_of_chain : Chained('chain') PathPart('bar') Args(0){
     my( $self, $c ) = @_;
     $c->log->debug('end of chain action happens!');
+    $c->stash->{chain_end_called} ||= 0;
+    $c->stash->{chain_end_called}++;
 }
 
 sub magic_side_request :Local{
